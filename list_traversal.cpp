@@ -66,14 +66,15 @@ double time(Int N, Int iters) {
 	auto dur = Clock::now() - start;
 	auto ns = duration_cast<nanoseconds>(dur).count();
 
-	return ns / double(N * iters);
+	//return ns / double(N * iters);
+	return ns;
 }
 
 
 int main(int argc, const char * argv[])
 {
 	// Outputs data in gnuplot friendly .data format
-	cout << "#bytes    ns/elem" << endl;
+	cout << "#bytes    ns" << endl;
 
 	try {
 		Int stopsPerFactor = 4; // For every power of 2, how many measurements do we do?
@@ -84,13 +85,15 @@ int main(int argc, const char * argv[])
 		Int min = stopsPerFactor * minElemensFactor;
 		Int max = stopsPerFactor * maxElemsFactor;
 
-		for (Int ei=min; ei<=max; ++ei) {
+		for (Int ei=min; ei<=max; ei += 16) {
 			Int N = (Int)round(pow(2.0, double(ei) / stopsPerFactor));
 			//Int reps = elemsPerMeasure / N;
 			Int reps = (Int)round(2e10 / pow(N, 1.5));
 			if (reps<1) reps = 1;
-			auto ans = time(N, reps);
-			cout << (N*sizeof(Node)) << "   " << ans << "   # (N=" << N << ", reps=" << reps << ") " << (ei-min+1) << "/" << (max-min+1) << endl;
+      for (Int run=1; run < 100; ++run) {
+			  auto ans = time(N, reps);
+			  cout << (N*sizeof(Node)) << "   " << ans << "   # (N=" << N << ", reps=" << reps << ") " << (ei-min+1) << "/" << (max-min+1) << endl;
+      }
 		}
 	} catch (exception& e) {
 		cout << "# stopped due to exception: " << e.what() << endl;
